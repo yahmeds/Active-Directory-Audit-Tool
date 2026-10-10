@@ -4,7 +4,7 @@ from getpass import getpass
 
 from ldap3 import ALL, Connection, Server
 
-from scanner.accounts import check_password_never_expires
+from scanner.accounts import check_password_never_expires, check_kerberoastable
 
 parser = argparse.ArgumentParser(description="Active Directory audit scanner")
 parser.add_argument("--server", required=True, help="Domain controller IP or hostname")
@@ -20,3 +20,7 @@ base_dn = server.info.other["defaultNamingContext"][0]
 
 for account in check_password_never_expires(conn, base_dn):
     print("Password never expires:", account)
+
+
+for account in check_kerberoastable(conn, base_dn):
+    print("Kerberoastable:", account)

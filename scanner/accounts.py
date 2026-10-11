@@ -1,5 +1,6 @@
 NEVER_EXPIRES = 65536
 DISABLED = 2
+DONT_REQ_PREAUTH = 4194304
 
 
 def check_password_never_expires(conn, base_dn):
@@ -36,4 +37,21 @@ def check_kerberoastable(conn, base_dn):
         if not uac & DISABLED :
             findings.append(name)
 
+    return findings
+
+def check_asrep_roastable(conn, base_dn):
+    findings = []
+    conn.search(
+        search_base=base_dn,
+        search_filter="(&(objectCategory=person)(objectClass=user))",
+        attributes=["sAMAccountName", "userAccountControl"],
+    )
+
+    for entry in conn.entries:
+        name = str(entry.sAMAccountName)
+        uac = int(entry.userAccountControl.value)
+
+        if uac & DONT_REQ_PREAUTH and not uac & DISABLED : 
+            findings.append(name)
+    
     return findings

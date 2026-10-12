@@ -5,6 +5,7 @@ from getpass import getpass
 from ldap3 import ALL, Connection, Server
 
 from scanner.accounts import check_password_never_expires, check_kerberoastable, check_asrep_roastable
+from scanner.groups import check_domain_admins
 
 parser = argparse.ArgumentParser(description="Active Directory audit scanner")
 parser.add_argument("--server", required=True, help="Domain controller IP or hostname")
@@ -27,3 +28,9 @@ for account in check_kerberoastable(conn, base_dn):
 
 for account in check_asrep_roastable(conn, base_dn):
     print("AS-REP roastable:", account)
+
+for account in check_domain_admins(conn, base_dn):
+    print("Domain Admin:", account)
+
+
+

@@ -6,6 +6,7 @@ from ldap3 import ALL, Connection, Server
 
 from scanner.accounts import check_password_never_expires, check_kerberoastable, check_asrep_roastable
 from scanner.groups import check_domain_admins
+from scanner.delegation import check_unconstrained_delegation
 
 parser = argparse.ArgumentParser(description="Active Directory audit scanner")
 parser.add_argument("--server", required=True, help="Domain controller IP or hostname")
@@ -32,5 +33,6 @@ for account in check_asrep_roastable(conn, base_dn):
 for account in check_domain_admins(conn, base_dn):
     print("Domain Admin:", account)
 
-
+for account in check_unconstrained_delegation(conn, base_dn):
+    print("Unconstrained delegation:", account)
 

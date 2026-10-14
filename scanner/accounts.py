@@ -34,7 +34,7 @@ def check_password_never_expires(conn, base_dn):
     )
 
 def check_kerberoastable(conn, base_dn): 
-    findings = []
+    accounts = []
 
     conn.search(
         search_base=base_dn,
@@ -46,12 +46,23 @@ def check_kerberoastable(conn, base_dn):
         uac = int(entry.userAccountControl.value)
 
         if not uac & DISABLED :
-            findings.append(name)
+            accounts.append(name)
 
-    return findings
+    if not accounts:
+        return None
+    
+    return Finding(
+        id="KERBEROASTABLE",
+        title="Kerberoastable accounts",
+        severity="high",
+        description="Any domain user can request a Kerberos ticket for these accounts and crack their password offline.",
+        remediation="Use a long random password or migrate to a gMSA. Enforce AES encryption and remove unneeded privileges from the account.",
+        accounts=accounts,
+    )
+
 
 def check_asrep_roastable(conn, base_dn):
-    findings = []
+    accounts = []
     conn.search(
         search_base=base_dn,
         search_filter="(&(objectCategory=person)(objectClass=user))",
@@ -63,6 +74,16 @@ def check_asrep_roastable(conn, base_dn):
         uac = int(entry.userAccountControl.value)
 
         if uac & DONT_REQ_PREAUTH and not uac & DISABLED : 
-            findings.append(name)
+            accounts.append(name)
     
-    return findings
+    if not accounts:
+        return None
+    
+    return Finding(
+        id="ASREP-ROASTABLE",
+        title="AS-REP roastable accounts",
+        severity="high",
+        description="Without Kerberos pre-authentication, anyone can request data encrypted with these accounts and crack it offline.",
+        remediation="Re-enable Kerberos pre-authentication on these accounts.",
+        accounts=accounts,
+    )

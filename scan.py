@@ -22,6 +22,8 @@ base_dn = server.info.other["defaultNamingContext"][0]
 
 checks = [
     check_password_never_expires,
+    check_kerberoastable,
+    check_asrep_roastable,
 ]
 
 results = []
@@ -36,11 +38,7 @@ for f in results:
     print("  Why:", f.description)
     print("  Fix:", f.remediation)
 
-for account in check_kerberoastable(conn, base_dn):
-    print("Kerberoastable:", account)
 
-for account in check_asrep_roastable(conn, base_dn):
-    print("AS-REP roastable:", account)
 
 for account in check_domain_admins(conn, base_dn):
     print("Domain Admin:", account)

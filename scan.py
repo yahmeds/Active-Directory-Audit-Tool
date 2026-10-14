@@ -20,9 +20,21 @@ server = Server(args.server, port=args.port, get_info=ALL)
 conn = Connection(server, user=args.user, password=password, auto_bind=True)
 base_dn = server.info.other["defaultNamingContext"][0]
 
-for account in check_password_never_expires(conn, base_dn):
-    print("Password never expires:", account)
+checks = [
+    check_password_never_expires,
+]
 
+results = []
+for check in checks:
+    finding = check(conn, base_dn)
+    if finding:
+        results.append(finding)
+
+for f in results:
+    print(f"[{f.severity.upper()}] {f.title}")
+    print("  Accounts:", ", ".join(f.accounts))
+    print("  Why:", f.description)
+    print("  Fix:", f.remediation)
 
 for account in check_kerberoastable(conn, base_dn):
     print("Kerberoastable:", account)
